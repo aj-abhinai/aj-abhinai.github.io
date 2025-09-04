@@ -6,7 +6,7 @@ title: "Compendium"
 
 Welcome to my course notes collection. Here you'll find organized notes, definitions, and key concepts from various courses and subjects.
 
-## Courses
+## [MBA](sem-3/index.md)
 
 *Your courses will appear here as you add them*
 
