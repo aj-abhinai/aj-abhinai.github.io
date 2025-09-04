@@ -1,8 +1,15 @@
 ---
-title: Welcome to Quartz
+title: "Abhinai Notes"
 ---
 
-This is a blank Quartz installation.
-See the [documentation](https://quartz.jzhao.xyz) for how to get started.
+# Welcome to My Knowledge Garden
 
-yes !
+This is my personal collection of course notes, definitions, and learning materials.
+
+## 📚 [Compendium](compendium/)
+
+Course notes organized by subject and course.
+
+---
+
+*This knowledge garden grows with each learning journey.*

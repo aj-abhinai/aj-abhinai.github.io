@@ -1,11 +1,6 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
 
-/**
- * Quartz 4 Configuration
- *
- * See https://quartz.jzhao.xyz/configuration for more information.
- */
 const config: QuartzConfig = {
   configuration: {
     pageTitle: "Abhinai note",
@@ -16,7 +11,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
-    baseUrl: "aj-abhinai.github.io", // ✅ your GitHub Pages URL
+    baseUrl: "aj-abhinai.github.io",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {
@@ -51,9 +46,6 @@ const config: QuartzConfig = {
           textHighlight: "#b3aa0288",
         },
       },
-    },
-    output: {
-      folder: "docs", // ✅ output folder for GitHub Pages
     },
   },
   plugins: {
