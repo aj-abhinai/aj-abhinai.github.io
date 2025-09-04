@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Quartz 4",
+    pageTitle: "Abhinai note",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
-    baseUrl: "quartz.jzhao.xyz",
+    baseUrl: "aj-abhinai.github.io", // ✅ your GitHub Pages URL
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "modified",
     theme: {
@@ -51,6 +51,9 @@ const config: QuartzConfig = {
           textHighlight: "#b3aa0288",
         },
       },
+    },
+    output: {
+      folder: "docs", // ✅ output folder for GitHub Pages
     },
   },
   plugins: {
