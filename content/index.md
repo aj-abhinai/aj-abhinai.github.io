@@ -1,12 +1,10 @@
 ---
-title: "Abhinai Notes"
+title: Abhinai's Notes
 ---
 
 # Welcome to My Knowledge Garden
 
 This is my personal collection of course notes, definitions, and learning materials.
-
-## 📚 [Compendium](compendium/)
 
 Course notes organized by subject and course.
 
