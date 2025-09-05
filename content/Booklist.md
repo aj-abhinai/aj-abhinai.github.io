@@ -1,6 +1,7 @@
+---
 title: Booklist
 tags:
-  - #books 
+  - books
 permalink: booklist
 ---
 
