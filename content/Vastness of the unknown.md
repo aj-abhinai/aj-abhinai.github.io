@@ -1,7 +1,7 @@
 ---
 title: Vastness of the unknown
 tags:
-  - #books 
+  - books 
 permalink: Vastness of the unknown
 ---
 
