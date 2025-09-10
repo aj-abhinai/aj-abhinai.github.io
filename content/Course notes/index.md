@@ -1,1 +1,7 @@
-This is my collection of academic notes — definitions, key concepts, and learnings from courses I’ve taken or am currently doing.
+---
+title: Course Notes
+permalink: course-notes
+tags:
+  - academic
+---
+A collection of my academic notes — definitions, key concepts, and insights from courses I’ve completed or am currently pursuing.
