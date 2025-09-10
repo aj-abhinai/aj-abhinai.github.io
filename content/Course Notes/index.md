@@ -6,4 +6,4 @@ tags:
 ---
 A collection of my academic notes — definitions, key concepts, and insights from courses I’ve completed or am currently pursuing.
 
-- [[notes|MBA]]
+[[notes|MBA]]

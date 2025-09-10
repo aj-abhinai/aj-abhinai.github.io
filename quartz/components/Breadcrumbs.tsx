@@ -58,19 +58,32 @@ export default ((opts?: Partial<BreadcrumbOptions>) => {
       return null
     }
 
-    const crumbs: CrumbData[] = pathNodes.map((node, idx) => {
-      const crumb = formatCrumb(node.displayName, fileData.slug!, simplifySlug(node.slug))
-      if (idx === 0) {
-        crumb.displayName = options.rootName
-      }
 
-      // For last node (current page), set empty path
-      if (idx === pathNodes.length - 1) {
-        crumb.path = ""
-      }
-
-      return crumb
-    })
+    // Filter out any folder under 'Course Notes' from breadcrumbs
+    const isCourseNotesPath = fileData.slug?.startsWith("Course Notes/")
+    const crumbs: CrumbData[] = pathNodes
+      .map((node, idx) => {
+        const crumb = formatCrumb(node.displayName, fileData.slug!, simplifySlug(node.slug))
+        if (idx === 0) {
+          crumb.displayName = options.rootName
+        }
+        // For last node (current page), set empty path
+        if (idx === pathNodes.length - 1) {
+          crumb.path = ""
+        }
+        return crumb
+      })
+      .filter((crumb, idx) => {
+        // If the page is under 'Course Notes', exclude any crumb after 'Course Notes'
+        if (isCourseNotesPath) {
+          // Find index of 'Course Notes' in the slug
+          const slugParts = fileData.slug!.split("/")
+          const courseNotesIdx = slugParts.indexOf("Course Notes")
+          // Only include up to 'Course Notes' (root + 'Course Notes')
+          return idx <= courseNotesIdx + 1
+        }
+        return true
+      })
 
     if (!options.showCurrentPage) {
       crumbs.pop()
