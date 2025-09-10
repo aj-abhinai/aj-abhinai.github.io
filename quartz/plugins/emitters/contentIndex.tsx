@@ -19,6 +19,8 @@ export type ContentDetails = {
   richContent?: string
   date?: Date
   description?: string
+  // custom frontmatter flag to hide a page (and implicitly its folder) from the Explorer sidebar
+  hideInExplorer?: boolean
 }
 
 interface Options {
@@ -115,6 +117,7 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
               : undefined,
             date: date,
             description: file.data.description ?? "",
+            hideInExplorer: file.data.frontmatter?.hideInExplorer === true,
           })
         }
       }

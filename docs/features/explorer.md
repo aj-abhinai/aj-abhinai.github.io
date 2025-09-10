@@ -98,6 +98,9 @@ You can pass your own functions for `sortFn`, `filterFn` and `mapFn`. All functi
 
 For more information on how to use `sort`, `filter` and `map`, you can check [Array.prototype.sort()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort), [Array.prototype.filter()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) and [Array.prototype.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map).
 
+> [!tip]
+> Want to keep a folder (and its notes) published but out of the Explorer sidebar? Add `hideInExplorer: true` to the folder's `index.md` frontmatter. See [[features/hiding from explorer|Hiding Notes from Explorer]] for details.
+
 Type definitions look like this:
 
 ```ts
