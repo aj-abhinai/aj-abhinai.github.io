@@ -47,9 +47,9 @@ const defaultOptions: Options = {
     }
   },
   filterFn: (node) => {
-    // hide tag index and anything explicitly marked via frontmatter hideInExplorer
+    // hide tag index and anything explicitly marked via frontmatter hideInExplorer (any truthy variant)
     // if the index file of a folder has hideInExplorer, the entire folder subtree will be removed
-    return node.slugSegment !== "tags" && node.data?.hideInExplorer !== true
+    return node.slugSegment !== "tags" && !node.data?.hideInExplorer
   },
   order: ["filter", "map", "sort"],
 }

@@ -8,7 +8,7 @@ You can publish notes (and link to them) while keeping them *out* of the Explore
 
 ## Frontmatter Flag
 
-Add the following frontmatter key to any note you want hidden:
+Add the following frontmatter key to any note you want hidden (the value may be `true`, `"true"`, `1`, `"1"`, `yes`, or `on`):
 
 ```md
 ---
@@ -21,7 +21,7 @@ The page will still be generated and is accessible through direct links, backlin
 
 ## Hiding Entire Folders
 
-If you place an `index.md` (or `_index.md`) inside a folder and give that index file `hideInExplorer: true`, the entire folder (and all of its children) will be hidden from the Explorer. This lets you:
+If you place an `index.md` (or `_index.md`) inside a folder and give that index file `hideInExplorer: true` (any truthy value works), the entire folder (and all of its children) will be hidden from the Explorer. This lets you:
 
 1. Keep the on-disk folder structure for your own organization (e.g. `content/Course Notes/Module 1/...`).
 2. Publish and link to the contained notes from other pages (like a master course index) without cluttering the sidebar.

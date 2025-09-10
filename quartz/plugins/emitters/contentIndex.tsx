@@ -105,6 +105,9 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
         const slug = file.data.slug!
         const date = getDate(ctx.cfg.configuration, file.data) ?? new Date()
         if (opts?.includeEmptyFiles || (file.data.text && file.data.text !== "")) {
+          // coerce various frontmatter representations to boolean
+          const rawHide = file.data.frontmatter?.hideInExplorer
+          const hideInExplorer = [true, "true", 1, "1", "yes", "on"].includes(rawHide as any)
           linkIndex.set(slug, {
             slug,
             filePath: file.data.relativePath!,
@@ -117,7 +120,7 @@ export const ContentIndex: QuartzEmitterPlugin<Partial<Options>> = (opts) => {
               : undefined,
             date: date,
             description: file.data.description ?? "",
-            hideInExplorer: file.data.frontmatter?.hideInExplorer === true,
+            hideInExplorer,
           })
         }
       }
