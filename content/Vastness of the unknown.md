@@ -4,7 +4,7 @@ tags:
   - books 
 permalink: Vastness of the unknown
 ---
->"your unread books are _not failures_ — they represent **potential knowledge, curiosity, and humility** about what you don’t yet know"
+> "your unread books are _not failures_ — they represent **potential knowledge, curiosity, and humility** about what you don’t yet know"
 
 - The Anthology of Balaji by Eric Jorgenson
 - Good Energy by Calley Means and Casey Means
@@ -12,6 +12,8 @@ permalink: Vastness of the unknown
 - Shoe Dog by Phil Knight
 - മരണവംശം (MARANAVAMSAM) by P V Shajikumar
 - Thinking, Fast and Slow by Daniel Kahneman
+- Thinking in Bets by Annie Duke
+- The Man from the Future by Ananyo Bhattacharya
 
 ### And the Long list
 

@@ -11,3 +11,5 @@ Course notes organized by subject and course.
 ---
 
 *This knowledge garden grows with each learning journey.*
+
+---
