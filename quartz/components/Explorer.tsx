@@ -46,7 +46,17 @@ const defaultOptions: Options = {
       return -1
     }
   },
-  filterFn: (node) => node.slugSegment !== "tags",
+  filterFn: (node) => {
+    // Exclude any folder or file under 'Course Notes' except the folder itself
+    const segments = node.slug.split("/")
+    if (
+      segments.includes("Course Notes") &&
+      segments[segments.length - 1] !== "Course Notes"
+    ) {
+      return false
+    }
+    return segments[segments.length - 1] !== "tags"
+  },
   order: ["filter", "map", "sort"],
 }
 
