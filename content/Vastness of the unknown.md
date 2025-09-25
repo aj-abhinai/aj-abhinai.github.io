@@ -8,7 +8,7 @@ permalink: Vastness of the unknown
 
 - The Anthology of Balaji by Eric Jorgenson
 - Good Energy by Calley Means and Casey Means
-- The Book Of Clarity by [Paras Chopra](https://invertedpassion.com/)
+- The Book of Clarity by [Paras Chopra](https://invertedpassion.com/)
 - Shoe Dog by Phil Knight
 - മരണവംശം (MARANAVAMSAM) by P V Shajikumar
 - Thinking, Fast and Slow by Daniel Kahneman
@@ -22,3 +22,7 @@ permalink: Vastness of the unknown
 - Ikigai by Francesc Miralles and Hector Garcia
 - Outlive: The Science & Art of Longevity by Peter Attia and Bill Gifford
 - Dopamine Nation by Anna Lembke
+- High Output Management by Andrew S. Grove
+- Principles by Ray Dalio
+- 
+
