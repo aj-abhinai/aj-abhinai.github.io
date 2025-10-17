@@ -1,11 +1,17 @@
-# Deployment Guide
+# Quartz Deployment Guide - Private Content Setup
 
 ## Quick Start
 
 After editing your content, simply run:
 
+**Command Prompt:**
 ```cmd
 deploy.bat
+```
+
+**PowerShell:**
+```powershell
+.\deploy.ps1
 ```
 
 That's it! Your site will be updated in 2-5 minutes.
@@ -14,79 +20,140 @@ That's it! Your site will be updated in 2-5 minutes.
 
 ## What Happens When You Deploy?
 
-1. **Step 1:** Your content changes are committed and pushed to the **private** repository (`content-ajabhinai`)
-2. **Step 2:** A timestamp file is created in the **public** repository to trigger GitHub Actions
-3. **Step 3:** GitHub Actions workflow automatically:
-   - Fetches latest content from private repo
-   - Fetches latest config from public repo
-   - Builds the Quartz site
-   - Deploys to GitHub Pages
+The script automatically handles everything:
+
+1. **Step 1:** Checks for content changes in `temp-content/` (private repo)
+   - If changes found, commits and pushes to private repository
+   - Commit message: `"Update content - [timestamp]"`
+
+2. **Step 2:** Checks for config/documentation changes in main directory (public repo)
+   - If changes found, commits them
+   - Commit message: `"Update configuration/documentation - [timestamp]"`
+
+3. **Step 3:** Creates deployment trigger
+   - Updates `.last-deploy` timestamp file
+   - Ensures GitHub Actions will run even if no changes detected
+
+4. **Step 4:** Pushes to public repository
+   - Triggers GitHub Actions workflow automatically
+   - Workflow fetches latest from both repos, builds site, and deploys to GitHub Pages
 
 ---
 
 ## Two Ways to Deploy
 
-### Option 1: Batch File (Recommended for Windows)
+### Option 1: Command Prompt (Windows)
 
 ```cmd
-cd "d:\My\my Codes\ajabhinai\quartz"
+cd "path\to\your\quartz\directory"
 deploy.bat
 ```
 
-### Option 2: PowerShell Script
+### Option 2: PowerShell (Recommended)
 
 ```powershell
-cd "d:\My\my Codes\ajabhinai\quartz"
+cd "path\to\your\quartz\directory"
 .\deploy.ps1
+```
+
+**Note:** If PowerShell blocks execution, run this first:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 ```
 
 ---
 
 ## Daily Workflow
 
-### When You Add/Edit Notes:
+### Scenario 1: Edit Content (Markdown Notes)
 
-1. **Edit** your markdown files in `d:\My\my Codes\ajabhinai\quartz\content\`
+1. **Edit** your markdown files in the `content/` directory
    - Use Obsidian, VS Code, or any text editor
+2. **Run deployment script**
+3. **Done!** The script handles everything
 
-2. **Deploy** by running:
-   ```cmd
-   deploy.bat
-   ```
+### Scenario 2: Edit Configuration/Theme/Docs
 
-3. **Wait** 2-5 minutes for GitHub Actions to build and deploy
+1. **Edit** Quartz config files, themes, or documentation
+   - Files like `quartz.config.ts`, `DEPLOYMENT_GUIDE.md`, etc.
+2. **Run deployment script**
+3. **Done!** The script handles everything
 
-4. **Check** your site: https://aj-abhinai.github.io
+### Scenario 3: Edit Both Content AND Configuration
+
+1. **Edit** whatever you want in any location
+2. **Run deployment script once**
+3. **Done!** The script detects and deploys all changes
+
+### Running the Deployment:
+
+**Command Prompt:**
+```cmd
+deploy.bat
+```
+
+**PowerShell:**
+```powershell
+.\deploy.ps1
+```
+
+**Wait** 2-5 minutes, then check your site: `https://YOUR_USERNAME.github.io`
 
 ---
 
 ## Troubleshooting
 
-### Script says "No changes in content repository"
+### Script says "No changes detected"
 
-This is normal if you haven't edited any files since last deployment.
+This is normal if you haven't edited any files since last deployment. The script will still trigger a rebuild.
 
-### Script fails with "Permission denied"
+### Script fails with "ERROR: Failed to commit changes"
 
-Make sure you've committed any changes and have internet connection.
+This error should not occur with the updated scripts. If it does:
+- Make sure you're in the correct directory
+- Check that git is installed and configured
+- Verify you have internet connection
+
+### Script fails with "Permission denied" or "Authentication failed"
+
+- Check your internet connection
+- Verify your GitHub credentials are set up correctly
+- Make sure you have push access to both repositories
 
 ### Want to check deployment status?
 
-Go to: https://github.com/aj-abhinai/aj-abhinai.github.io/actions
+Go to: `https://github.com/YOUR_USERNAME/YOUR_USERNAME.github.io/actions`
 
 ---
 
 ## Important: Don't Use `npx quartz sync`
 
-**OLD WAY (Don't use):**
+**❌ OLD WAY (Don't use):**
 ```cmd
-npx quartz sync   # ❌ This pushes content to public repo!
+npx quartz sync   # This pushes content to public repo!
 ```
 
-**NEW WAY (Use this):**
+**✅ NEW WAY (Use these scripts):**
 ```cmd
-deploy.bat        # ✅ This keeps content in private repo!
+deploy.bat        # Keeps content private, handles everything!
 ```
+or
+```powershell
+.\deploy.ps1      # Keeps content private, handles everything!
+```
+
+## What Makes These Scripts Better?
+
+The deployment scripts automatically:
+- ✅ Detect changes in both content AND configuration
+- ✅ Commit changes to the appropriate repositories
+- ✅ Keep private content in private repo
+- ✅ Keep public config in public repo
+- ✅ Handle all git operations for you
+- ✅ Trigger deployment to GitHub Pages
+- ✅ Show clear summary of what was deployed
+
+**One command does everything - no manual git commits needed!**
 
 ---
 
@@ -95,7 +162,7 @@ deploy.bat        # ✅ This keeps content in private repo!
 If you want to preview changes before deploying:
 
 ```cmd
-cd "d:\My\my Codes\ajabhinai\quartz"
+cd "path\to\your\quartz\directory"
 npx quartz build --serve
 ```
 
@@ -108,7 +175,7 @@ Then open: http://localhost:8080
 ## Repository Structure
 
 ```
-d:\My\my Codes\ajabhinai\quartz\
+your-quartz-directory/
 ├── content/               # Your local working directory (edit here)
 ├── temp-content/          # Git repo linked to private GitHub repo
 ├── deploy.bat             # Deployment script (Windows)
@@ -127,15 +194,43 @@ d:\My\my Codes\ajabhinai\quartz\
 
 | Task | Command |
 |------|---------|
-| Deploy changes | `deploy.bat` |
-| Check deployment status | Visit [Actions page](https://github.com/aj-abhinai/aj-abhinai.github.io/actions) |
+| Deploy changes (CMD) | `deploy.bat` |
+| Deploy changes (PowerShell) | `.\deploy.ps1` |
+| Check deployment status | Visit GitHub Actions page of your repo |
 | Local preview | `npx quartz build --serve` |
-| View your site | https://aj-abhinai.github.io |
+| View your site | `https://YOUR_USERNAME.github.io` |
+
+---
+
+## Setup Overview
+
+This deployment setup uses a **two-repository architecture**:
+
+1. **Private Repository** - Stores your markdown content files
+2. **Public Repository** - Stores Quartz configuration and site code
+
+**Benefits:**
+- ✅ Website is fully public and accessible
+- ✅ Content source files are NOT forkable or bulk-downloadable
+- ✅ People can fork your Quartz setup without getting your content
+- ✅ Automated deployment via GitHub Actions
 
 ---
 
 ## Need Help?
 
-- **Deployment issues:** Check [GitHub Actions logs](https://github.com/aj-abhinai/aj-abhinai.github.io/actions)
+- **Deployment issues:** Check GitHub Actions logs in your repository
 - **Quartz documentation:** https://quartz.jzhao.xyz/
 - **Git issues:** Make sure you're in the correct directory and have internet connection
+
+---
+
+## About This Setup
+
+This guide assumes you have:
+- A private repository for your content
+- A public repository with Quartz setup
+- GitHub Actions workflow configured to fetch from private repo
+- Personal Access Token configured as `PRIVATE_CONTENT_TOKEN` secret
+
+For complete setup instructions, see the Private Content Setup Guide.
