@@ -113,14 +113,14 @@ Write-Host ""
 if ($hasPrivateChanges -or $hasPublicChanges) {
     Write-Host "Summary:" -ForegroundColor Cyan
     if ($hasPrivateChanges) {
-        Write-Host "  ✓ Content changes deployed" -ForegroundColor Green
+        Write-Host "  [+] Content changes deployed" -ForegroundColor Green
     }
     if ($hasPublicChanges) {
-        Write-Host "  ✓ Configuration/documentation changes deployed" -ForegroundColor Green
+        Write-Host "  [+] Configuration/documentation changes deployed" -ForegroundColor Green
     }
 } else {
     Write-Host "Summary:" -ForegroundColor Cyan
-    Write-Host "  ✓ No changes detected, triggered rebuild anyway" -ForegroundColor Yellow
+    Write-Host "  [!] No changes detected, triggered rebuild anyway" -ForegroundColor Yellow
 }
 
 Write-Host ""
