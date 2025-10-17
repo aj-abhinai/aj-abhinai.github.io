@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - v4
+  # Allow manual trigger
+  workflow_dispatch:
+  # Trigger when private repo updates
+  repository_dispatch:
+    types: [content-update]
 
 permissions:
   contents: read
@@ -21,6 +26,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Fetch all history for git info
+
+      # Checkout private content repository
+      - name: Checkout private content repository
+        uses: actions/checkout@v4
+        with:
+          repository: aj-abhinai/content-ajabhinai
+          token: ${{ secrets.PRIVATE_CONTENT_TOKEN }}
+          path: content
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
