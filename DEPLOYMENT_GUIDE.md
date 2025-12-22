@@ -163,12 +163,12 @@ If you want to preview changes before deploying:
 
 ```cmd
 cd "path\to\your\quartz\directory"
-npx quartz build --serve
+npx quartz build --serve -d temp-content
 ```
 
 Then open: http://localhost:8080
 
-**Note:** Local preview uses your local content files, not the private repo.
+**Note:** The `-d temp-content` flag tells Quartz to use your private content folder instead of the default `content` folder.
 
 ---
 
