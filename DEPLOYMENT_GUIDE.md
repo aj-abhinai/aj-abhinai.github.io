@@ -234,3 +234,4 @@ This guide assumes you have:
 - Personal Access Token configured as `PRIVATE_CONTENT_TOKEN` secret
 
 For complete setup instructions, see the Private Content Setup Guide.
+`python sync-notes.py` to sync notes
