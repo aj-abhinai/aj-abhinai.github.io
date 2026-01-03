@@ -8,12 +8,11 @@ export type SortFn = (f1: QuartzPluginData, f2: QuartzPluginData) => number
 
 export function byDateAndAlphabetical(_cfg: GlobalConfiguration): SortFn {
   return (f1, f2) => {
-    // Sort by created date (from frontmatter), not the config's defaultDateType
+    // Sort by modified date (descending - most recently modified first)
     if (f1.dates && f2.dates) {
-      // Use created date for sorting (descending - newest first)
-      const f1Created = f1.dates.created?.getTime() ?? 0
-      const f2Created = f2.dates.created?.getTime() ?? 0
-      return f2Created - f1Created
+      const f1Modified = f1.dates.modified?.getTime() ?? 0
+      const f2Modified = f2.dates.modified?.getTime() ?? 0
+      return f2Modified - f1Modified
     } else if (f1.dates && !f2.dates) {
       // prioritize files with dates
       return -1
@@ -36,12 +35,12 @@ export function byDateAndAlphabeticalFolderFirst(_cfg: GlobalConfiguration): Sor
     if (f1IsFolder && !f2IsFolder) return -1
     if (!f1IsFolder && f2IsFolder) return 1
 
-    // If both are folders or both are files, sort by created date (from frontmatter)
+    // If both are folders or both are files, sort by modified date
     if (f1.dates && f2.dates) {
-      // Use created date for sorting (descending - newest first)
-      const f1Created = f1.dates.created?.getTime() ?? 0
-      const f2Created = f2.dates.created?.getTime() ?? 0
-      return f2Created - f1Created
+      // Use modified date for sorting (descending - most recently modified first)
+      const f1Modified = f1.dates.modified?.getTime() ?? 0
+      const f2Modified = f2.dates.modified?.getTime() ?? 0
+      return f2Modified - f1Modified
     } else if (f1.dates && !f2.dates) {
       // prioritize files with dates
       return -1
