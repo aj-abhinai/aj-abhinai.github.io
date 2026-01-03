@@ -211,6 +211,67 @@ def remove_published_tag(content: str) -> str:
     return content.strip()
 
 
+def extract_first_line_tags(content: str) -> tuple[list[str], str]:
+    """Extract tags from the first line of content and return (tags, cleaned_content).
+    
+    Tags on the first line are moved to frontmatter, tags elsewhere in the body stay intact.
+    """
+    lines = content.split('\n')
+    if not lines:
+        return [], content
+    
+    first_line = lines[0]
+    # Find all tags on the first line (excluding #published which is handled separately)
+    tag_pattern = r'#([a-zA-Z][a-zA-Z0-9_-]*)'
+    tags = re.findall(tag_pattern, first_line)
+    # Filter out 'published' tag
+    tags = [tag for tag in tags if tag.lower() != 'published']
+    
+    if not tags:
+        return [], content
+    
+    # Remove tags from first line
+    cleaned_first_line = re.sub(r'#[a-zA-Z][a-zA-Z0-9_-]*\s*', '', first_line).strip()
+    
+    # Rebuild content - if first line is now empty, skip it
+    if cleaned_first_line:
+        lines[0] = cleaned_first_line
+        cleaned_content = '\n'.join(lines)
+    else:
+        cleaned_content = '\n'.join(lines[1:]).lstrip()
+    
+    return tags, cleaned_content
+
+
+def add_tags_to_frontmatter(frontmatter: str, tags: list[str]) -> str:
+    """Add tags to frontmatter, merging with existing tags if any."""
+    if not tags:
+        return frontmatter
+    
+    # Check if tags field already exists
+    tags_match = re.search(r'^tags:\s*\[([^\]]*)\]', frontmatter, re.MULTILINE)
+    if tags_match:
+        # Parse existing tags
+        existing = [t.strip().strip('"\'') for t in tags_match.group(1).split(',') if t.strip()]
+        all_tags = list(set(existing + tags))
+        tags_str = ', '.join(all_tags)
+        frontmatter = re.sub(r'^tags:\s*\[[^\]]*\]', f'tags: [{tags_str}]', frontmatter, flags=re.MULTILINE)
+    else:
+        # Check for YAML list style tags
+        tags_yaml_match = re.search(r'^tags:\s*\n((?:\s+-\s*.+\n?)+)', frontmatter, re.MULTILINE)
+        if tags_yaml_match:
+            existing = re.findall(r'-\s*(.+)', tags_yaml_match.group(1))
+            all_tags = list(set(existing + tags))
+            tags_yaml = '\n'.join([f'  - {t}' for t in all_tags])
+            frontmatter = re.sub(r'^tags:\s*\n(?:\s+-\s*.+\n?)+', f'tags:\n{tags_yaml}\n', frontmatter, flags=re.MULTILINE)
+        else:
+            # No existing tags, add new
+            tags_str = ', '.join(tags)
+            frontmatter = frontmatter.rstrip() + f'\ntags: [{tags_str}]'
+    
+    return frontmatter
+
+
 def merge_content(source_content: str, dest_content: str, published_names: set[str], assets_copied: set[str], filename: str) -> tuple[str, int]:
     """Merge: preserve destination frontmatter (with updated last-modified), update body from source."""
     source_fm, source_body = parse_frontmatter(source_content)
@@ -220,6 +281,9 @@ def merge_content(source_content: str, dest_content: str, published_names: set[s
     processed_body, asset_count = process_assets(source_body, None, assets_copied)
     processed_body = process_backlinks(processed_body, published_names)
     processed_body = remove_published_tag(processed_body)
+    
+    # Extract first-line tags and clean body
+    first_line_tags, processed_body = extract_first_line_tags(processed_body)
     
     # Compare processed body with destination body
     # If bodies are identical, we don't want to update the last-modified date
@@ -235,6 +299,9 @@ def merge_content(source_content: str, dest_content: str, published_names: set[s
     else:
         fm = generate_new_frontmatter(filename)
         fm = update_frontmatter_with_modified(fm)
+    
+    # Add first-line tags to frontmatter
+    fm = add_tags_to_frontmatter(fm, first_line_tags)
     
     return f"---\n{fm}\n---\n\n{processed_body}", asset_count
 
@@ -313,11 +380,17 @@ def main():
                 processed_body = process_backlinks(processed_body, published_names)
                 processed_body = remove_published_tag(processed_body)
                 
+                # Extract first-line tags and clean body
+                first_line_tags, processed_body = extract_first_line_tags(processed_body)
+                
                 # Generate or use existing frontmatter
                 if source_fm:
                     fm = source_fm
                 else:
                     fm = generate_new_frontmatter(filename)
+                
+                # Add first-line tags to frontmatter
+                fm = add_tags_to_frontmatter(fm, first_line_tags)
                 
                 new_content = f"---\n{fm}\n---\n\n{processed_body}"
                 
