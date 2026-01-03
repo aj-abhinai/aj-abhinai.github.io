@@ -195,7 +195,7 @@ your-quartz-directory/
 | Task | Command |
 |------|---------|
 | Deploy changes (CMD) | `deploy.bat` |
-| Deploy changes (PowerShell) | `.\deploy.ps1` |
+| Deploy changes (PowerShell) | `   ` |
 | Check deployment status | Visit GitHub Actions page of your repo |
 | Local preview | `npx quartz build --serve -d temp-content` |
 | View your site | `https://YOUR_USERNAME.github.io` |
