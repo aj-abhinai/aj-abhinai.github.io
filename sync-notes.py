@@ -214,13 +214,19 @@ def remove_published_tag(content: str) -> str:
 def merge_content(source_content: str, dest_content: str, published_names: set[str], assets_copied: set[str], filename: str) -> tuple[str, int]:
     """Merge: preserve destination frontmatter (with updated last-modified), update body from source."""
     source_fm, source_body = parse_frontmatter(source_content)
-    dest_fm, _ = parse_frontmatter(dest_content)
+    dest_fm, dest_body = parse_frontmatter(dest_content)
     
     # Process assets, backlinks, and remove #published tag from source body
     processed_body, asset_count = process_assets(source_body, None, assets_copied)
     processed_body = process_backlinks(processed_body, published_names)
     processed_body = remove_published_tag(processed_body)
     
+    # Compare processed body with destination body
+    # If bodies are identical, we don't want to update the last-modified date
+    # or rewrite the file.
+    if processed_body == str(dest_body):
+        return None, asset_count
+
     # Keep destination frontmatter if exists, otherwise use source
     if dest_fm:
         fm = update_frontmatter_with_modified(dest_fm)
@@ -270,6 +276,7 @@ def main():
     copied = 0
     updated = 0
     skipped = 0
+    unchanged = 0
     assets_total = 0
     assets_copied = set()  # Track copied assets to avoid duplicates
     
@@ -289,10 +296,16 @@ def main():
                 # Update: preserve frontmatter, update body
                 dest_content = dest_file.read_text(encoding='utf-8')
                 merged, asset_count = merge_content(source_content, dest_content, published_names, assets_copied, filename)
-                dest_file.write_text(merged, encoding='utf-8')
-                print(f"↻ Updated: {filename}")
-                updated += 1
-                assets_total += asset_count
+                
+                if merged is None:
+                    # No changes detected
+                    unchanged += 1
+                    # print(f"  Unchanged: {filename}") # Optional: comment out to reduce noise
+                else:
+                    dest_file.write_text(merged, encoding='utf-8')
+                    print(f"↻ Updated: {filename}")
+                    updated += 1
+                    assets_total += asset_count
             else:
                 # New file: copy with processed backlinks, assets, and generated frontmatter
                 source_fm, source_body = parse_frontmatter(source_content)
@@ -320,6 +333,7 @@ def main():
     print("Summary:")
     print(f"  ✓ Notes copied: {copied}")
     print(f"  ↻ Notes updated: {updated}")
+    print(f"  = Notes unchanged: {unchanged}")
     print(f"  ⊘ Notes skipped: {skipped}")
     print(f"  📁 Assets copied: {assets_total}")
     print(f"\nFiles synced to: {DEST_DIR}")
