@@ -234,4 +234,6 @@ This guide assumes you have:
 - Personal Access Token configured as `PRIVATE_CONTENT_TOKEN` secret
 
 For complete setup instructions, see the Private Content Setup Guide.
-`python sync-notes.py` to sync notes
+
+## Note Synchronization
+For details on how to use the `python sync-notes.py` script to sync specific notes from your Obsidian vault, please refer to the [Sync Notes Guide](SYNC_NOTES_GUIDE.md).

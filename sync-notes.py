@@ -169,37 +169,181 @@ def process_assets(content: str, source_file: Path, assets_copied: set[str]) -> 
     return content, copied_count
 
 
-def process_backlinks(content: str, published_names: set[str]) -> str:
-    """Keep backlinks only if target is also published, otherwise remove.
-    
-    PRIMARY CONDITION: Only keep backlinks to notes that have #published tag.
-    The published_names set contains only filenames (stems) of notes with #published.
-    
-    SECONDARY CONDITION: Strip heading anchors before comparison.
-    Links like [[Note#Section|Display]] should match if "Note" is published,
-    even though the full link text includes "#Section".
+def process_backlinks(content: str, published_names: set[str], current_note: str) -> str:
+    """Keep same-note links, keep links to published notes, otherwise show as text.
+
+    Also normalizes links to match the flattened destination structure by stripping
+    folders and .md extensions when rebuilding published links.
     """
-    def replace_link(match):
-        link = match.group(1).strip()
-        display = match.group(2)
-        
-        # Strip heading anchor (e.g., "Note#Section" -> "Note") for comparison
-        # This ensures [[Static Site Generator#Heading|text]] matches "Static Site Generator"
-        base_link = link.split('#')[0].strip()
-        
-        # If base_link is empty (e.g., [[#^blockid]]), it's an internal Obsidian block reference
-        # These don't work in Quartz, so remove them entirely
-        if not base_link:
-            return ''
-        
-        # Check if the base note (without anchor) is in published notes
-        if base_link in published_names:
-            return match.group(0)  # Keep the backlink (including anchor)
-        # Remove backlink, keep display text or link name
-        return display[1:] if display else link
-    
-    # Handle [[link]] or [[link|display]]
-    return re.sub(r'\[\[([^\]|]+)(\|[^\]]+)?\]\]', replace_link, content)
+    published_lookup = {name.casefold(): name for name in published_names}
+    current_lookup = current_note.casefold()
+
+    def is_published(note_name: str) -> bool:
+        return note_name.casefold() in published_lookup
+
+    def is_same_note(note_name: str) -> bool:
+        return note_name.casefold() == current_lookup
+
+    def normalize_note_name(raw: str) -> str:
+        # Strip folders and .md extension
+        name = raw.replace("\\", "/").split("/")[-1].strip()
+        if name.lower().endswith(".md"):
+            name = name[:-3]
+        return name
+
+    def canonical_note_name(note_name: str) -> str:
+        return published_lookup.get(note_name.casefold(), note_name)
+
+    # Process Obsidian-style wikilinks [[...]] (but not embeds ![[...]])
+    def replace_wikilink(match):
+        inner = match.group(1).strip()
+        if not inner:
+            return match.group(0)
+
+        if "|" in inner:
+            target_part, alias = inner.split("|", 1)
+            target_part = target_part.strip()
+            alias = alias.strip()
+        else:
+            target_part = inner
+            alias = None
+
+        # Same-note anchors like [[#Heading]] or [[#^blockid]] should stay as links
+        if target_part.startswith(("#", "^")):
+            return match.group(0)
+
+        # Split off heading/block reference if present
+        note_part = target_part
+        anchor = ""
+        if "#" in target_part:
+            note_part, anchor_tail = target_part.split("#", 1)
+            anchor = f"#{anchor_tail}"
+        elif "^" in target_part:
+            note_part, anchor_tail = target_part.split("^", 1)
+            anchor = f"^{anchor_tail}"
+
+        note_part = note_part.strip()
+        if not note_part:
+            return match.group(0)
+
+        note_name = normalize_note_name(note_part)
+        if not note_name:
+            return match.group(0)
+
+        if is_same_note(note_name):
+            return match.group(0)
+
+        if not is_published(note_name):
+            # Non-published target: convert to plain text
+            if alias:
+                return alias
+            return f"{note_name}{anchor}"
+
+        # Published target: rematch to flattened structure
+        note_display = canonical_note_name(note_name)
+        alias_part = f"|{alias}" if alias else ""
+        return f"[[{note_display}{anchor}{alias_part}]]"
+
+    content = re.sub(r'(?<!\!)\[\[([^\]]+)\]\]', replace_wikilink, content)
+
+    def split_md_destination(raw: str) -> tuple[str, str, bool]:
+        raw = raw.strip()
+        if raw.startswith("<"):
+            end = raw.find(">")
+            if end != -1:
+                dest = raw[1:end]
+                rest = raw[end + 1:].strip()
+                title = f" {rest}" if rest else ""
+                return dest, title, True
+            return raw, "", False
+
+        # Detect title at the end (CommonMark-style "title" or 'title' or (title))
+        title_match = re.search(r'\s+("([^"\\]|\\.)*"|\'([^\'\\]|\\.)*\'|\([^()]*\))\s*$', raw)
+        if title_match:
+            dest = raw[:title_match.start()].strip()
+            title = " " + title_match.group(1).strip()
+            return dest, title, False
+
+        return raw, "", False
+
+    def replace_md_link(text: str, target_raw: str, original: str) -> str:
+        url, title, used_angle = split_md_destination(target_raw)
+
+        # External links or same-note anchors should stay as links
+        if re.match(r'^[a-zA-Z][a-zA-Z0-9+.-]*:', url):
+            return original
+        if url.startswith("#"):
+            return original
+
+        base, _, fragment = url.partition("#")
+        base = base.lstrip("./").strip()
+        if not base:
+            return original
+
+        ext = Path(base).suffix.lower()
+        # Only treat .md or extensionless links as notes
+        if ext and ext != ".md":
+            return original
+
+        note_name = normalize_note_name(base)
+        if not note_name:
+            return original
+
+        if is_same_note(note_name):
+            return original
+
+        if not is_published(note_name):
+            return text
+
+        note_display = canonical_note_name(note_name)
+        new_url = note_display
+        if ext == ".md":
+            new_url += ".md"
+        if fragment:
+            new_url += f"#{fragment}"
+        if used_angle:
+            new_url = f"<{new_url}>"
+
+        return f"[{text}]({new_url}{title})"
+
+    def replace_markdown_links(content_in: str) -> str:
+        result = []
+        i = 0
+        length = len(content_in)
+        while i < length:
+            if content_in[i] == "[" and (i == 0 or content_in[i - 1] != "!"):
+                # Find closing ]
+                j = i + 1
+                while j < length and content_in[j] != "]":
+                    j += 1
+                if j < length and j + 1 < length and content_in[j + 1] == "(":
+                    # Parse destination with balanced parentheses
+                    k = j + 2
+                    depth = 1
+                    while k < length and depth > 0:
+                        if content_in[k] == "\\":
+                            k += 2
+                            continue
+                        if content_in[k] == "(":
+                            depth += 1
+                        elif content_in[k] == ")":
+                            depth -= 1
+                        k += 1
+                    if depth == 0:
+                        text = content_in[i + 1:j]
+                        target_raw = content_in[j + 2:k - 1]
+                        original = content_in[i:k]
+                        result.append(replace_md_link(text, target_raw, original))
+                        i = k
+                        continue
+                # Fall through if malformed
+            result.append(content_in[i])
+            i += 1
+
+        return "".join(result)
+
+    content = replace_markdown_links(content)
+    return content
 
 
 def remove_published_tag(content: str) -> str:
@@ -272,18 +416,30 @@ def add_tags_to_frontmatter(frontmatter: str, tags: list[str]) -> str:
     return frontmatter
 
 
+def prepare_body(
+    source_body: str,
+    published_names: set[str],
+    assets_copied: set[str],
+    current_note: str,
+) -> tuple[str, int, list[str]]:
+    processed_body, asset_count = process_assets(source_body, None, assets_copied)
+    processed_body = process_backlinks(processed_body, published_names, current_note)
+    processed_body = remove_published_tag(processed_body)
+    first_line_tags, processed_body = extract_first_line_tags(processed_body)
+    return processed_body, asset_count, first_line_tags
+
+
 def merge_content(source_content: str, dest_content: str, published_names: set[str], assets_copied: set[str], filename: str) -> tuple[str, int]:
     """Merge: preserve destination frontmatter (with updated last-modified), update body from source."""
     source_fm, source_body = parse_frontmatter(source_content)
     dest_fm, dest_body = parse_frontmatter(dest_content)
     
-    # Process assets, backlinks, and remove #published tag from source body
-    processed_body, asset_count = process_assets(source_body, None, assets_copied)
-    processed_body = process_backlinks(processed_body, published_names)
-    processed_body = remove_published_tag(processed_body)
-    
-    # Extract first-line tags and clean body
-    first_line_tags, processed_body = extract_first_line_tags(processed_body)
+    processed_body, asset_count, first_line_tags = prepare_body(
+        source_body,
+        published_names,
+        assets_copied,
+        Path(filename).stem,
+    )
     
     # Compare processed body with destination body
     # If bodies are identical, we don't want to update the last-modified date
@@ -376,12 +532,12 @@ def main():
             else:
                 # New file: copy with processed backlinks, assets, and generated frontmatter
                 source_fm, source_body = parse_frontmatter(source_content)
-                processed_body, asset_count = process_assets(source_body, source_file, assets_copied)
-                processed_body = process_backlinks(processed_body, published_names)
-                processed_body = remove_published_tag(processed_body)
-                
-                # Extract first-line tags and clean body
-                first_line_tags, processed_body = extract_first_line_tags(processed_body)
+                processed_body, asset_count, first_line_tags = prepare_body(
+                    source_body,
+                    published_names,
+                    assets_copied,
+                    source_file.stem,
+                )
                 
                 # Generate or use existing frontmatter
                 if source_fm:
