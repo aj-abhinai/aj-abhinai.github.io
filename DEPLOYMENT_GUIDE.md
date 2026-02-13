@@ -199,7 +199,7 @@ your-quartz-directory/
 | Check deployment status | Visit GitHub Actions page of your repo |
 | Local preview | `npx quartz build --serve -d temp-content` |
 | View your site | `https://YOUR_USERNAME.github.io` |
-
+| upgrade quartz to latest version | `npx quartz update` |
 ---
 
 ## Setup Overview
