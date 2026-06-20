@@ -124,11 +124,7 @@ def process_assets(content: str, source_file: Path, assets_copied: set[str]) -> 
         nonlocal copied_count
         asset_name = match.group(1).strip()
         
-        # Skip if it's a note link (no extension or .md)
-        if '.' not in asset_name or asset_name.endswith('.md'):
-            return match.group(0)
-        
-        # Find the asset in source
+        # Check if it's an actual asset file on disk
         asset_path = find_asset_in_source(asset_name, SOURCE_DIR, SKIP_DIRS)
         if asset_path and asset_path.suffix.lower() in ASSET_EXTENSIONS:
             dest_asset = ASSETS_DIR / asset_name
@@ -138,6 +134,7 @@ def process_assets(content: str, source_file: Path, assets_copied: set[str]) -> 
                 copied_count += 1
             # Update to relative path
             return f"![{asset_name}](./assets/{asset_name})"
+        # Not an asset — leave it for process_embedded_notes
         return match.group(0)
     
     # Pattern for standard markdown: ![alt](path)
@@ -167,6 +164,23 @@ def process_assets(content: str, source_file: Path, assets_copied: set[str]) -> 
     content = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)', replace_md_image, content)
     
     return content, copied_count
+
+
+def process_embedded_notes(content: str, published_names: set[str]) -> str:
+    published_lookup = {name.casefold(): name for name in published_names}
+
+    def replace_embed(match):
+        target = match.group(1).strip()
+        note_name = target.split("#")[0].strip()
+        if not note_name:
+            return match.group(0)
+        if note_name.casefold() not in published_lookup:
+            return ""
+        canonical = published_lookup[note_name.casefold()]
+        suffix = target[len(note_name):]
+        return f"![[{canonical}{suffix}]]"
+
+    return re.sub(r'!\[\[([^\]]+)\]\]', replace_embed, content)
 
 
 def process_backlinks(content: str, published_names: set[str], current_note: str) -> str:
@@ -348,10 +362,7 @@ def process_backlinks(content: str, published_names: set[str], current_note: str
 
 def remove_published_tag(content: str) -> str:
     """Remove #published tag from content."""
-    # Remove #published with optional trailing whitespace/newline
     content = re.sub(r'#published\s*\n?', '', content, flags=re.IGNORECASE)
-    # Clean up any resulting empty lines
-    content = re.sub(r'\n\n\n+', '\n\n', content)
     return content.strip()
 
 
@@ -382,7 +393,7 @@ def extract_first_line_tags(content: str) -> tuple[list[str], str]:
         lines[0] = cleaned_first_line
         cleaned_content = '\n'.join(lines)
     else:
-        cleaned_content = '\n'.join(lines[1:]).lstrip()
+        cleaned_content = '\n'.join(lines[1:])
     
     return tags, cleaned_content
 
@@ -423,6 +434,7 @@ def prepare_body(
     current_note: str,
 ) -> tuple[str, int, list[str]]:
     processed_body, asset_count = process_assets(source_body, None, assets_copied)
+    processed_body = process_embedded_notes(processed_body, published_names)
     processed_body = process_backlinks(processed_body, published_names, current_note)
     processed_body = remove_published_tag(processed_body)
     first_line_tags, processed_body = extract_first_line_tags(processed_body)
