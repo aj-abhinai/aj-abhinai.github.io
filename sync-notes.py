@@ -178,7 +178,7 @@ def process_embedded_notes(content: str, published_names: set[str]) -> str:
             return ""
         canonical = published_lookup[note_name.casefold()]
         suffix = target[len(note_name):]
-        return f"![[{canonical}{suffix}]]"
+        return f"[[{canonical}{suffix}]]"
 
     return re.sub(r'!\[\[([^\]]+)\]\]', replace_embed, content)
 
