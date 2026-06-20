@@ -166,6 +166,35 @@ def process_assets(content: str, source_file: Path, assets_copied: set[str]) -> 
     return content, copied_count
 
 
+def _extract_block_text(source_dir: Path, skip_dirs: set[str], note_name: str, block_id: str) -> str | None:
+    """Find a note by name in the source vault and extract text associated with a block ID."""
+    for item in source_dir.rglob(f"{note_name}.md"):
+        if any(skip in item.parts for skip in skip_dirs):
+            continue
+        if not item.is_file():
+            continue
+        try:
+            text = item.read_text(encoding='utf-8')
+        except Exception:
+            return None
+
+        lines = text.split('\n')
+        for i, line in enumerate(lines):
+            # Inline: "text ^blockid"
+            stripped = line.strip()
+            if stripped.endswith(f" ^{block_id}"):
+                content = stripped[:-len(f" ^{block_id}")].strip()
+                if content:
+                    return content
+            # Standalone: "text\n^blockid"
+            if stripped == f"^{block_id}" and i > 0:
+                prev = lines[i - 1].strip()
+                if prev:
+                    return prev
+        return None
+    return None
+
+
 def process_embedded_notes(content: str, published_names: set[str]) -> str:
     published_lookup = {name.casefold(): name for name in published_names}
 
@@ -178,6 +207,17 @@ def process_embedded_notes(content: str, published_names: set[str]) -> str:
             return ""
         canonical = published_lookup[note_name.casefold()]
         suffix = target[len(note_name):]
+
+        # Block reference — extract inline text from source
+        if suffix.startswith("#^"):
+            block_id = suffix[2:]
+            extract = _extract_block_text(SOURCE_DIR, SKIP_DIRS, canonical, block_id)
+            if extract is not None:
+                return extract
+            # fallback to link
+            return f"[[{canonical}{suffix}]]"
+
+        # Heading or plain link — return as link
         return f"[[{canonical}{suffix}]]"
 
     return re.sub(r'!\[\[([^\]]+)\]\]', replace_embed, content)
