@@ -9,8 +9,14 @@ Write-Host ""
 $hasPrivateChanges = $false
 $hasPublicChanges = $false
 
+# Step 0: Sync published notes from Obsidian vault
+Write-Host "[0/5] Syncing published notes from Obsidian vault..." -ForegroundColor Yellow
+$env:PYTHONIOENCODING='utf-8'
+python sync-notes.py
+Write-Host ""
+
 # Step 1: Check and push content to private repository
-Write-Host "[1/4] Checking private repository (content)..." -ForegroundColor Yellow
+Write-Host "[1/5] Checking private repository (content)..." -ForegroundColor Yellow
 Push-Location temp-content
 
 git add .
@@ -50,7 +56,7 @@ Pop-Location
 Write-Host ""
 
 # Step 2: Check and commit public repository changes (config, themes, docs)
-Write-Host "[2/4] Checking public repository (config/docs)..." -ForegroundColor Yellow
+Write-Host "[2/5] Checking public repository (config/docs)..." -ForegroundColor Yellow
 
 git add .
 
@@ -77,7 +83,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host ""
 
 # Step 3: Always create deployment trigger (even if no changes, to force rebuild)
-Write-Host "[3/4] Creating deployment trigger..." -ForegroundColor Yellow
+Write-Host "[3/5] Creating deployment trigger..." -ForegroundColor Yellow
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 "Last deployed: $timestamp" | Out-File -FilePath ".last-deploy" -Encoding UTF8
 
@@ -94,7 +100,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host ""
 
 # Step 4: Push to public repository (triggers GitHub Actions)
-Write-Host "[4/4] Pushing to public repository and triggering deployment..." -ForegroundColor Yellow
+Write-Host "[4/5] Pushing to public repository and triggering deployment..." -ForegroundColor Yellow
 git push origin v4
 
 if ($LASTEXITCODE -ne 0) {

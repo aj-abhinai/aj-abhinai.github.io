@@ -12,8 +12,14 @@ echo.
 set "hasPrivateChanges=0"
 set "hasPublicChanges=0"
 
+REM Step 0: Sync published notes from Obsidian vault
+echo [0/5] Syncing published notes from Obsidian vault...
+set PYTHONIOENCODING=utf-8
+python sync-notes.py
+echo.
+
 REM Step 1: Check and push content to private repository
-echo [1/4] Checking private repository (content)...
+echo [1/5] Checking private repository (content)...
 cd temp-content
 git add .
 
@@ -50,7 +56,7 @@ cd ..
 echo.
 
 REM Step 2: Check and commit public repository changes (config, themes, docs)
-echo [2/4] Checking public repository (config/docs)...
+echo [2/5] Checking public repository (config/docs)...
 git add .
 
 REM Check if there are any changes in public repo
@@ -74,7 +80,7 @@ if !errorlevel! neq 0 (
 echo.
 
 REM Step 3: Always create deployment trigger (even if no changes, to force rebuild)
-echo [3/4] Creating deployment trigger...
+echo [3/5] Creating deployment trigger...
 echo Last deployed: %date% %time% > .last-deploy
 
 git add .last-deploy
@@ -90,7 +96,7 @@ if !errorlevel! neq 0 (
 echo.
 
 REM Step 4: Push to public repository (triggers GitHub Actions)
-echo [4/4] Pushing to public repository and triggering deployment...
+echo [4/5] Pushing to public repository and triggering deployment...
 git push origin v4
 
 if !errorlevel! neq 0 (
