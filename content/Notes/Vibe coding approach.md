@@ -4,7 +4,7 @@ permalink: vibe-coding-approach
 date: 2026-02-23
 publish: true
 tags: [thread]
-last-modified: 2026-08-30
+last-modified: 2026-08-31
 ---
 
 
