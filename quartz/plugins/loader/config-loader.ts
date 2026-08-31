@@ -31,6 +31,8 @@ import Flex from "../../components/Flex"
 import MobileOnly from "../../components/MobileOnly"
 import DesktopOnly from "../../components/DesktopOnly"
 import ConditionalRender from "../../components/ConditionalRender"
+import CreatedModifiedMeta from "../../components/CreatedModifiedMeta"
+import PageTitle from "../../components/PageTitle"
 
 const CONFIG_YAML_PATH = path.join(process.cwd(), "quartz.config.yaml")
 const DEFAULT_CONFIG_YAML_PATH = path.join(process.cwd(), "quartz.config.default.yaml")
@@ -509,6 +511,13 @@ export async function loadQuartzConfig(
 
   // Load layout and add PageTypeDispatcher to emitters.
   // This must happen after plugin instantiation so the component registry is populated.
+  componentRegistry.register("@quartz-community/content-meta", CreatedModifiedMeta, "local")
+  componentRegistry.register("content-meta", CreatedModifiedMeta, "local")
+  componentRegistry.register("ContentMeta", CreatedModifiedMeta, "local")
+  componentRegistry.register("@quartz-community/page-title", PageTitle, "local")
+  componentRegistry.register("@quartz-community/page-title/PageTitle", PageTitle, "local")
+  componentRegistry.register("page-title", PageTitle, "local")
+  componentRegistry.register("PageTitle", PageTitle, "local")
   const layout = await loadQuartzLayout()
   plugins.emitters.push(
     builtinPlugins.PageTypes.PageTypeDispatcher({
