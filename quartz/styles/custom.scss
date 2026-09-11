@@ -328,6 +328,33 @@ body[data-slug="index"] #quartz-root .recent-notes {
 }
 
 // ---------------------------------------------------------------------------
+// Folder / tag listing rows
+// ---------------------------------------------------------------------------
+
+#quartz-root li.section-li > .section {
+  align-items: center;
+}
+
+#quartz-root li.section-li {
+  margin-bottom: 0.6em;
+}
+
+@media (min-width: 601px) {
+  #quartz-root li.section-li > .section > .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0;
+  }
+
+  #quartz-root li.section-li > .section > .tags > li {
+    display: inline-flex;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Subtle motion
 // ---------------------------------------------------------------------------
 
