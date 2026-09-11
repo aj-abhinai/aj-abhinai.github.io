@@ -1,3 +1,369 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+// ============================================================================
+// Warm paper / editorial layer for the claude-warm base theme.
+//
+// Notes:
+// - The theme stylesheet is injected *after* this file, so overrides are
+//   anchored to `#quartz-root` (id specificity) to win reliably.
+// - All motion lives behind `prefers-reduced-motion: no-preference`.
+// ============================================================================
+
+:root {
+  --paper-radius: 10px;
+  --paper-radius-lg: 14px;
+  --paper-border: color-mix(in srgb, var(--secondary) 18%, transparent);
+  --paper-shadow: 0 1px 2px rgba(74, 58, 26, 0.05), 0 10px 30px -24px rgba(74, 58, 26, 0.55);
+  --paper-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+// ---------------------------------------------------------------------------
+// Weight tuning (theme hardcodes body copy at 400, which reads thin in light)
+// ---------------------------------------------------------------------------
+
+:root:root:root {
+  --font-normal: 500;
+  --h2-weight: 600;
+  --h3-weight: 600;
+  --h4-weight: 600;
+  --h5-weight: 600;
+  --h6-weight: 600;
+}
+
+#quartz-root .markdown-rendered p,
+#quartz-root .markdown-rendered li,
+#quartz-root .markdown-rendered td,
+#quartz-root .markdown-rendered blockquote {
+  font-weight: 500;
+}
+
+// ---------------------------------------------------------------------------
+// Paper grain
+// ---------------------------------------------------------------------------
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background-image: var(--paper-noise);
+  background-size: 160px 160px;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+:root[saved-theme="dark"] body::before {
+  opacity: 0.055;
+  mix-blend-mode: soft-light;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--secondary) 28%, transparent);
+}
+
+// ---------------------------------------------------------------------------
+// Editorial details: headings, horizontal rules, pull quotes
+// ---------------------------------------------------------------------------
+
+#quartz-root article {
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.015em;
+  }
+
+  h1 {
+    letter-spacing: -0.025em;
+  }
+
+  hr {
+    height: auto;
+    margin: 2.4rem auto;
+    border: 0;
+    background: none;
+    text-align: center;
+
+    &::after {
+      content: "⁂";
+      display: block;
+      color: color-mix(in srgb, var(--gray) 75%, transparent);
+      font-size: 1.05rem;
+      letter-spacing: 0.35em;
+      text-indent: 0.35em;
+    }
+  }
+
+  blockquote {
+    position: relative;
+    margin: 1.75rem 0;
+    padding: 0.35rem 0 0.35rem 2.6rem;
+    border-left: 0;
+    border-inline-start: 0;
+    font-size: 1.03em;
+    font-style: italic;
+
+    &::before {
+      content: "\201C";
+      position: absolute;
+      left: 0.05rem;
+      top: -0.5rem;
+      font-family: var(--headerFont);
+      font-size: 3.1rem;
+      line-height: 1;
+      color: var(--secondary);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Links
+// ---------------------------------------------------------------------------
+
+#quartz-root a.internal,
+#quartz-root a.internal-link {
+  border-radius: 4px;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--secondary) 40%, transparent);
+  transition:
+    color 0.16s ease,
+    text-decoration-color 0.16s ease,
+    background-color 0.16s ease;
+}
+
+#quartz-root a.internal:hover,
+#quartz-root a.internal-link:hover {
+  color: var(--tertiary);
+  text-decoration-color: var(--tertiary);
+  background-color: color-mix(in srgb, var(--secondary) 12%, transparent);
+}
+
+#quartz-root a.internal.broken {
+  color: var(--gray);
+  text-decoration-style: dotted;
+}
+
+#quartz-root a.external,
+#quartz-root a.external-link {
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--secondary) 40%, transparent);
+}
+
+#quartz-root article h1 > a[role="anchor"],
+#quartz-root article h2 > a[role="anchor"],
+#quartz-root article h3 > a[role="anchor"],
+#quartz-root article h4 > a[role="anchor"],
+#quartz-root article h5 > a[role="anchor"],
+#quartz-root article h6 > a[role="anchor"] {
+  background: transparent;
+  text-decoration: none;
+  color: var(--gray);
+}
+
+#quartz-root article a[role="anchor"]:hover {
+  background-color: transparent;
+  text-decoration: none;
+  color: var(--secondary);
+}
+
+// ---------------------------------------------------------------------------
+// Tags, callouts, media surfaces
+// ---------------------------------------------------------------------------
+
+#quartz-root ul.tags > li {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  list-style: none;
+}
+
+#quartz-root a.internal.tag-link {
+  display: inline-block;
+  margin: 0 0.05rem;
+  padding: 0.02rem 0.55rem;
+  border: 1px solid var(--paper-border);
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--secondary) 8%, transparent);
+  color: var(--secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &::before {
+    content: "#";
+    margin-right: 0.1rem;
+    opacity: 0.55;
+  }
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--secondary) 34%, transparent);
+    background-color: color-mix(in srgb, var(--secondary) 16%, transparent);
+    color: var(--tertiary);
+  }
+}
+
+#quartz-root .callout {
+  border-radius: var(--paper-radius);
+  box-shadow: var(--paper-shadow);
+}
+
+#quartz-root article img,
+#quartz-root article video {
+  border-radius: var(--paper-radius);
+  box-shadow: var(--paper-shadow);
+}
+
+// ---------------------------------------------------------------------------
+// Homepage polish (Favorites + Connect become pill cards)
+// ---------------------------------------------------------------------------
+
+body[data-slug="index"] #quartz-root article .markdown-rendered {
+  > h1 {
+    font-size: clamp(2.1rem, 4vw, 2.9rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+
+  > p:first-of-type {
+    font-size: 1.08rem;
+    color: var(--gray);
+  }
+
+  > p > em:only-child {
+    display: block;
+    color: var(--gray);
+    text-align: center;
+  }
+
+  > ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 0.75rem 0 1.25rem;
+    padding: 0;
+
+    > li {
+      list-style: none;
+      margin: 0;
+
+      > a.internal,
+      > a.external {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.9rem;
+        border: 1px solid var(--paper-border);
+        border-radius: 999px;
+        background-color: color-mix(in srgb, var(--secondary) 6%, transparent);
+        color: var(--secondary);
+        font-size: 0.92rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+          transform 0.16s ease,
+          background-color 0.16s ease,
+          border-color 0.16s ease,
+          color 0.16s ease;
+
+        &:hover {
+          transform: translateY(-1px);
+          border-color: color-mix(in srgb, var(--secondary) 32%, transparent);
+          background-color: color-mix(in srgb, var(--secondary) 13%, transparent);
+          color: var(--tertiary);
+        }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Recent notes (homepage)
+// ---------------------------------------------------------------------------
+
+body[data-slug="index"] #quartz-root .recent-notes {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--lightgray);
+
+  > h3 {
+    font-family: var(--headerFont);
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+  }
+
+  ul.recent-ul {
+    padding: 0;
+
+    > li.recent-li {
+      padding: 0.55rem 0;
+      border-bottom: 1px solid color-mix(in srgb, var(--lightgray) 70%, transparent);
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      .desc h3 {
+        margin: 0;
+        font-size: 1.02rem;
+      }
+
+      .meta {
+        margin: 0.15rem 0 0;
+        color: var(--gray);
+        font-size: 0.82rem;
+      }
+
+      .tags {
+        margin-top: 0.3rem;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Subtle motion
+// ---------------------------------------------------------------------------
+
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  @keyframes paper-rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #quartz-root .center > article > * {
+    animation: paper-rise 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  #quartz-root .callout {
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  #quartz-root .callout:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 2px 4px rgba(74, 58, 26, 0.06),
+      0 14px 30px -22px rgba(74, 58, 26, 0.65);
+  }
+}

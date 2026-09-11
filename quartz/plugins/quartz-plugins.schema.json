@@ -57,17 +57,17 @@
               "type": "object",
               "additionalProperties": false,
               "properties": {
+                "title": {
+                  "$ref": "#/$defs/fontSpecification"
+                },
                 "header": {
-                  "type": "string",
-                  "description": "Font family for headers"
+                  "$ref": "#/$defs/fontSpecification"
                 },
                 "body": {
-                  "type": "string",
-                  "description": "Font family for body text"
+                  "$ref": "#/$defs/fontSpecification"
                 },
                 "code": {
-                  "type": "string",
-                  "description": "Font family for code"
+                  "$ref": "#/$defs/fontSpecification"
                 }
               }
             },
@@ -340,6 +340,34 @@
           "description": "Layout configuration by page type"
         }
       }
+    }
+  },
+  "$defs": {
+    "fontSpecification": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "weights": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "includeItalic": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
     }
   }
 }
